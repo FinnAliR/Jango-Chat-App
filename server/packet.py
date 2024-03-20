@@ -1,8 +1,10 @@
 import json
 import enum
 
+
 class Action(enum.Enum):
     pass
+
 
 class Packet:
     def __init__(self, action: Action, *payloads):
@@ -13,13 +15,14 @@ class Packet:
         serialize_dict = {'a': self.action.name}
         for i in range(len(self.payloads)):
             serialize_dict[f'p{i}'] = self.payloads[i]
-        data = json.dumps(serialize_dict, separators=(',',':'))
-        return data # parses data 
-    
+        data = json.dumps(serialize_dict, separators=(',', ':'))
+        return data
+
     def __bytes__(self) -> bytes:
         return str(self).encode('utf-8')
 
-def from_json(json_str: str) -> Packet: #Packetclass constructor
+
+def from_json(json_str: str) -> Packet:
     obj_dict = json.loads(json_str)
 
     action = None
@@ -27,15 +30,19 @@ def from_json(json_str: str) -> Packet: #Packetclass constructor
     for key, value in obj_dict.items():
         if key == 'a':
             action = value
+
         elif key[0] == 'p':
             index = int(key[1:])
             payloads.insert(index, value)
-    
+
+    # Use reflection to construct the specific packet type we're looking for
     class_name = action + "Packet"
-    try: #Error handes
+    try:
         constructor: type = globals()[class_name]
         return constructor(*payloads)
     except KeyError as e:
-        print(f"{class_name} is not a valid packet name. Stacktrace {e}")
+        print(
+            f"{class_name} is not a valid packet name. Stacktrace: {e}")
     except TypeError:
-        print(f"{class_name} can not handle argumetns {tuple(payloads)}.")
+        print(
+            f"{class_name} can't handle arguments {tuple(payloads)}.")
