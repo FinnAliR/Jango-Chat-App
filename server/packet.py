@@ -20,7 +20,13 @@ class Packet:
 
     def __bytes__(self) -> bytes:
         return str(self).encode('utf-8')
+    
+class ChatPacket(Packet):
+    def __init__(self, message: str):
+        super().__init__(Action.Chat, message)
 
+class Action(enum.Enum):
+    Chat = enum.auto()
 
 def from_json(json_str: str) -> Packet:
     obj_dict = json.loads(json_str)
